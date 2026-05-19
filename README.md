@@ -80,8 +80,6 @@ The extension automatically detects and categorizes saves from:
 - X / Twitter
 - Instagram
 - YouTube
-- Reddit
-- LinkedIn
 - Any other website, tagged as General
 
 ## Configuration
