@@ -842,7 +842,7 @@ async function loadExistingSettings() {
     }
 
     // Source preferences
-    const sourcesList = data.enabledSources || ['X / Twitter', 'Instagram', 'YouTube', 'Reddit', 'LinkedIn', 'General web pages'];
+    const sourcesList = data.enabledSources || ['X / Twitter', 'Instagram', 'YouTube', 'General web pages'];
     sourcePrefCheckboxes.forEach(cb => {
       cb.checked = sourcesList.includes(cb.value);
     });

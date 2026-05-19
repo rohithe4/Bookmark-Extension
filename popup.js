@@ -315,7 +315,7 @@ document.addEventListener('keydown', (e) => {
  * Dynamically builds source filter tabs based on user's enabled sources.
  */
 function buildSourceTabs(enabledSources) {
-  const sources = enabledSources || ['X / Twitter', 'Instagram', 'YouTube', 'Reddit', 'LinkedIn', 'General web pages'];
+  const sources = enabledSources || ['X / Twitter', 'Instagram', 'YouTube', 'General web pages'];
 
   // Clear existing tabs (keep the "All" button)
   DOM.tabsHeader.innerHTML = '';
