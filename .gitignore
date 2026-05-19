@@ -1,0 +1,16 @@
+# Backup files with potential secrets
+background_backup.js
+*_backup.*
+*.bak
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Environment / secrets
+.env
+*.env
