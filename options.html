@@ -1,0 +1,1224 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notion Bookmark — Settings</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
+  <style>
+    *,
+    *::before,
+    *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #0b0b0c;
+      --surface: #131316;
+      --surface-2: #1a1a1f;
+      --border: rgba(255, 255, 255, 0.06);
+      --border-hover: rgba(255, 255, 255, 0.12);
+      --text-primary: #f4f4f6;
+      --text-secondary: #9f9fa9;
+      --text-muted: #55555f;
+      --accent: #ffffff;
+      --accent-dim: rgba(255, 255, 255, 0.08);
+      --success: #22c55e;
+      --success-bg: rgba(34, 197, 94, 0.08);
+      --success-border: rgba(34, 197, 94, 0.2);
+      --error: #ef4444;
+      --error-bg: rgba(239, 68, 68, 0.08);
+      --error-border: rgba(239, 68, 68, 0.2);
+      --warn: #f59e0b;
+      --warn-bg: rgba(245, 158, 11, 0.08);
+      --warn-border: rgba(245, 158, 11, 0.2);
+      --radius: 14px;
+      --radius-sm: 8px;
+      --transition: 160ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    html {
+      background: var(--bg);
+    }
+
+    body {
+      font-family: 'Figtree', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px 80px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Page header ── */
+    .page-header {
+      text-align: center;
+      margin-bottom: 40px;
+      max-width: 520px;
+    }
+
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    .logo-name {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+    }
+
+    .page-header h1 {
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      margin-bottom: 10px;
+      background: linear-gradient(135deg, #fff 30%, rgba(255, 255, 255, 0.5));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .page-header p {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* ── Progress bar ── */
+    .progress-bar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 8px 12px;
+      margin-bottom: 40px;
+      max-width: 680px;
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 20px;
+    }
+
+    .progress-step {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-muted);
+      transition: color var(--transition);
+    }
+
+    .progress-step .step-status {
+      font-size: 11px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .progress-step.completed {
+      color: var(--success);
+    }
+
+    .progress-step.active {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    .progress-step::after {
+      content: '→';
+      margin-left: 10px;
+      color: var(--text-muted);
+      opacity: 0.4;
+    }
+
+    .progress-step:last-child::after {
+      display: none;
+    }
+
+    /* ── Cards / Steps ── */
+    .setup-card {
+      display: none;
+      /* Hide non-active steps (Progressive Disclosure) */
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+      max-width: 540px;
+      width: 100%;
+      margin-bottom: 16px;
+      transition: border-color var(--transition);
+      animation: fadeSlide 240ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .setup-card.active {
+      display: block;
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .card-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: var(--radius-sm);
+      background: var(--accent-dim);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .card-subtitle {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 3px;
+      line-height: 1.5;
+    }
+
+    /* ── Step number badge ── */
+    .step-badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    /* ── Instruction list ── */
+    .instruction-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .instruction-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      font-size: 13px;
+    }
+
+    .instruction-list li .num {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-muted);
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .highlight-badge {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      padding: 1px 6px;
+      border-radius: 5px;
+      font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
+      font-size: 12px;
+      color: var(--text-primary);
+    }
+
+    .instruction-list a {
+      color: #a5b4fc;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .instruction-list a:hover {
+      text-decoration: underline;
+    }
+
+    /* Link styled button */
+    .link-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border);
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 11px;
+      color: var(--text-primary);
+      text-decoration: none;
+      margin-top: 12px;
+      margin-right: 8px;
+    }
+
+    .link-btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: var(--border-hover);
+    }
+
+    .link-btn .ext-icon {
+      font-size: 10px;
+      opacity: 0.6;
+    }
+
+    /* ── Info callout ── */
+    .callout {
+      padding: 12px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      line-height: 1.5;
+      margin: 18px 0;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+
+    .callout.info {
+      background: rgba(99, 102, 241, 0.08);
+      border: 1px solid rgba(99, 102, 241, 0.2);
+      color: #a5b4fc;
+    }
+
+    .callout.warn {
+      background: var(--warn-bg);
+      border: 1px solid var(--warn-border);
+      color: #fbd38d;
+    }
+
+    .callout-icon {
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+
+    /* ── Help section links ── */
+    .help-section {
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    .help-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .help-links-list {
+      list-style: none;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 14px;
+    }
+
+    .help-links-list li a {
+      font-size: 12px;
+      color: #a5b4fc;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: color var(--transition);
+    }
+
+    .help-links-list li a:hover {
+      color: #c7d2fe;
+      text-decoration: underline;
+    }
+
+    /* ── Inputs ── */
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+
+    .field-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .field-hint {
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-bottom: 2px;
+    }
+
+    .field-input {
+      width: 100%;
+      padding: 10px 12px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 13px;
+      outline: none;
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+
+    .field-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .field-input:focus {
+      border-color: rgba(255, 255, 255, 0.2);
+      box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.04);
+    }
+
+    .field-input.valid {
+      border-color: rgba(34, 197, 94, 0.4);
+    }
+
+    .field-input.invalid {
+      border-color: rgba(239, 68, 68, 0.4);
+    }
+
+    .field-validation {
+      font-size: 11px;
+      min-height: 16px;
+      transition: all var(--transition);
+    }
+
+    .field-validation.success {
+      color: var(--success);
+    }
+
+    .field-validation.error {
+      color: var(--error);
+    }
+
+    /* ── Buttons ── */
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 10px 20px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      outline: none;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: var(--bg);
+      transition: background var(--transition), box-shadow var(--transition), transform var(--transition);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: #fff;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.12);
+    }
+
+    .btn-secondary {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      transition: background var(--transition), color var(--transition), border-color var(--transition), transform var(--transition);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text-primary);
+    }
+
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .btn:active:not(:disabled) {
+      transform: scale(0.98);
+    }
+
+    .spinner {
+      width: 13px;
+      height: 13px;
+      border: 2px solid rgba(0, 0, 0, 0.15);
+      border-top-color: var(--bg);
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+
+    .spinner.light {
+      border-color: rgba(255, 255, 255, 0.15);
+      border-top-color: var(--text-primary);
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* ── Connection result ── */
+    .conn-result {
+      display: none;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 14px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      margin-top: 14px;
+      animation: fadeSlide 200ms ease;
+      white-space: pre-wrap;
+    }
+
+    .conn-result.visible {
+      display: flex;
+    }
+
+    .conn-result.success {
+      background: var(--success-bg);
+      border: 1px solid var(--success-border);
+      color: #86efac;
+    }
+
+    .conn-result.error {
+      background: var(--error-bg);
+      border: 1px solid var(--error-border);
+      color: #fca5a5;
+    }
+
+    .conn-result .result-icon {
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .conn-result .result-body {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .conn-result .result-title {
+      font-weight: 700;
+      line-height: 1.5;
+    }
+
+    .conn-result .result-detail {
+      font-size: 11px;
+      opacity: 0.9;
+      font-weight: 400;
+      line-height: 1.5;
+    }
+
+    /* ── Saved banner ── */
+    .saved-banner {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 14px;
+      background: var(--success-bg);
+      border: 1px solid var(--success-border);
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--success);
+      margin-top: 14px;
+      animation: fadeSlide 200ms ease;
+    }
+
+    .saved-banner.visible {
+      display: flex;
+    }
+
+    @keyframes fadeSlide {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ── Divider ── */
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 18px 0;
+    }
+
+    /* ── Extracted ID preview ── */
+    .extracted-id {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      background: rgba(99, 102, 241, 0.07);
+      border: 1px solid rgba(99, 102, 241, 0.18);
+      border-radius: var(--radius-sm);
+      font-size: 11px;
+      margin-top: 8px;
+      animation: fadeSlide 160ms ease;
+    }
+
+    .extracted-id.visible {
+      display: flex;
+    }
+
+    .extracted-id .id-label {
+      color: #a5b4fc;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .extracted-id .id-value {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 10px;
+      color: var(--text-primary);
+      word-break: break-all;
+    }
+
+    /* Start Over wrapper */
+    .start-over-wrapper {
+      margin-top: 24px;
+      text-align: center;
+    }
+
+    .start-over-link {
+      font-size: 12px;
+      color: var(--text-muted);
+      transition: color var(--transition);
+      cursor: pointer;
+    }
+
+    .start-over-link:hover {
+      color: var(--text-secondary);
+      text-decoration: underline;
+    }
+
+    /* Input with eye toggle container */
+    .input-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+      width: 100%;
+    }
+
+    .input-container .field-input {
+      padding-right: 44px;
+    }
+
+    .eye-toggle-btn {
+      position: absolute;
+      right: 8px;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 6px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color var(--transition), background-color var(--transition);
+      z-index: 2;
+    }
+
+    .eye-toggle-btn:hover {
+      color: var(--text-secondary);
+      background-color: var(--surface-2);
+    }
+
+    .eye-toggle-btn svg {
+      width: 18px;
+      height: 18px;
+      stroke: currentColor;
+    }
+
+    /* Revoke Modal Overlay */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 200ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* Revoke Modal Content Card */
+    .modal-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+      max-width: 420px;
+      width: 90%;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
+      transform: scale(0.95);
+      transition: transform 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .modal-overlay.active .modal-card {
+      transform: scale(1);
+    }
+
+    .modal-icon-container {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-primary);
+      text-align: center;
+    }
+
+    .modal-text {
+      font-size: 13px;
+      color: var(--text-secondary);
+      text-align: center;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ── WIZARD ONBOARDING CONTAINER ── -->
+  <div id="wizardContainer" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="logo">
+        <div class="logo-icon">📌</div>
+        <span class="logo-name">Notion Bookmark</span>
+      </div>
+      <h1>Connect your Notion database</h1>
+      <p>Follow these simple steps and you'll be saving bookmarks in under 2 minutes — no technical knowledge needed.</p>
+    </div>
+
+    <!-- Progress bar -->
+    <div class="progress-bar" id="progressBar">
+      <div class="progress-step active" id="ps1">
+        <span class="step-status">●</span> <span class="step-label">Set up database</span>
+      </div>
+      <div class="progress-step" id="ps2">
+        <span class="step-status">○</span> <span class="step-label">Create connection</span>
+      </div>
+      <div class="progress-step" id="ps3">
+        <span class="step-status">○</span> <span class="step-label">Test credentials</span>
+      </div>
+      <div class="progress-step" id="ps4">
+        <span class="step-status">○</span> <span class="step-label">Done</span>
+      </div>
+    </div>
+
+    <!-- ── Step 1: Set up your Notion database ── -->
+    <div class="setup-card active" id="step1Card">
+      <div class="step-badge">Step 1 of 4</div>
+      <div class="card-header">
+        <div class="card-icon">🗄️</div>
+        <div>
+          <div class="card-title">Set up your Notion database</div>
+          <div class="card-subtitle">First, create a database in Notion to store your saved bookmarks.</div>
+        </div>
+      </div>
+
+      <ul class="instruction-list">
+        <li>
+          <span class="num">1</span>
+          <span>Open Notion and go to any page.</span>
+        </li>
+        <li>
+          <span class="num">2</span>
+          <span>Type <code class="highlight-badge">/table</code> and choose <strong>"Table - Inline"</strong>.</span>
+        </li>
+        <li>
+          <span class="num">3</span>
+          <span>Name it "Saved Bookmarks" (or anything you like).</span>
+        </li>
+        <li>
+          <span class="num">4</span>
+          <span>Make sure it has these properties (columns):</span>
+        </li>
+        <li style="padding-left: 30px; flex-direction: column; gap: 8px;">
+          <div>• <span class="highlight-badge">Title</span> (already exists by default ✓)</div>
+          <div>• <span class="highlight-badge">URL</span> (add this: type <strong>URL</strong>)</div>
+          <div>• <span class="highlight-badge">Source</span> (add this: type <strong>Multi-select</strong> or
+            <strong>Select</strong>)
+          </div>
+        </li>
+      </ul>
+
+      <!-- Help links -->
+      <div class="help-section">
+        <div class="help-title">New to Notion databases?</div>
+        <ul class="help-links-list">
+          <li><a href="https://www.youtube.com/watch?v=d3H07kNpUdQ" target="_blank">🎥 Watch: Creating a database ↗</a> (3 min video)</li>
+          <li><a href="https://www.notion.com/help/create-a-database" target="_blank">📖 Read: Notion's database guide ↗</a></li>
+        </ul>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-primary" id="step1Next">Next →</button>
+      </div>
+    </div>
+
+    <!-- ── Step 2: Create and connect a Notion connection ── -->
+    <div class="setup-card" id="step2Card">
+      <div class="step-badge">Step 2 of 4</div>
+      <div class="card-header">
+        <div class="card-icon">🔗</div>
+        <div>
+          <div class="card-title">Create and connect a Notion connection</div>
+          <div class="card-subtitle">A connection lets this extension access your database.</div>
+        </div>
+      </div>
+
+      <ul class="instruction-list">
+        <li style="font-weight: 700; color: var(--text-primary); margin-bottom: 4px;">Part A: Create the connection</li>
+        <li>
+          <span class="num">1</span>
+          <span>Go to: <a href="https://www.notion.so/my-integrations" target="_blank" class="highlight-badge"
+              style="color: #a5b4fc; text-decoration: underline;">Notion connections ↗</a></span>
+        </li>
+        <li>
+          <span class="num">2</span>
+          <span>Click <strong>+ New Connection</strong>.</span>
+        </li>
+        <li>
+          <span class="num">3</span>
+          <span>Name it <strong>"Bookmark Saver"</strong>.</span>
+        </li>
+        <li>
+          <span class="num">4</span>
+          <span>Click <strong>Submit</strong>.</span>
+        </li>
+        <li>
+          <span class="num">5</span>
+          <span>Copy the <strong>Access token</strong> (inside Integration Token section, starts with <code>ntn_</code> or
+            <code>secret_</code>).</span>
+        </li>
+
+        <li style="font-weight: 700; color: var(--text-primary); margin-top: 14px; margin-bottom: 4px;">Part B: Add it to your database</li>
+        <li>
+          <span class="num">1</span>
+          <span>Open your database from Step 1.</span>
+        </li>
+        <li>
+          <span class="num">2</span>
+          <span>Click the <strong>⋯ (three dots)</strong> menu in the top right.</span>
+        </li>
+        <li>
+          <span class="num">3</span>
+          <span>Click <strong>Add connections</strong>.</span>
+        </li>
+        <li>
+          <span class="num">4</span>
+          <span>Search for <strong>"Bookmark Saver"</strong> and select it. Click <strong>Confirm</strong>.</span>
+        </li>
+      </ul>
+
+      <!-- Help links -->
+      <div class="help-section">
+        <div class="help-title">Need help?</div>
+        <ul class="help-links-list">
+          <li><a href="https://www.notion.com/help/add-and-manage-connections-with-the-api" target="_blank">📖 Read & Watch: Add and manage connections ↗</a></li>
+        </ul>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-secondary" id="step2Back">← Back</button>
+        <button class="btn btn-primary" id="step2Next">Next →</button>
+      </div>
+    </div>
+
+    <!-- ── Step 3: Paste credentials and test ── -->
+    <div class="setup-card" id="step3Card">
+      <div class="step-badge">Step 3 of 4</div>
+      <div class="card-header">
+        <div class="card-icon">⚙️</div>
+        <div>
+          <div class="card-title">Paste your credentials</div>
+          <div class="card-subtitle">Paste the secret token you copied and your database link below, then test the connection.</div>
+        </div>
+      </div>
+      <!-- Which sources do you want to save from? -->
+      <div class="form-group" style="margin-bottom: 24px;">
+        <label class="field-label">Which sources do you want to save from?</label>
+        <div class="field-hint" style="margin-bottom: 12px;">Choose the platforms you want the extension to organize automatically. We’ll set up the matching source labels for you in Notion.</div>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; margin-bottom: 10px;">
+          <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none;">
+            <input type="checkbox" class="source-pref-checkbox" value="X / Twitter" checked style="width: 16px; height: 16px; accent-color: #3b82f6; cursor: pointer;">
+            <span style="font-size: 13px; color: var(--text-secondary);">X / Twitter</span>
+          </label>
+          <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none;">
+            <input type="checkbox" class="source-pref-checkbox" value="Instagram" checked style="width: 16px; height: 16px; accent-color: #3b82f6; cursor: pointer;">
+            <span style="font-size: 13px; color: var(--text-secondary);">Instagram</span>
+          </label>
+          <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none;">
+            <input type="checkbox" class="source-pref-checkbox" value="YouTube" checked style="width: 16px; height: 16px; accent-color: #3b82f6; cursor: pointer;">
+            <span style="font-size: 13px; color: var(--text-secondary);">YouTube</span>
+          </label>
+          <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none;">
+            <input type="checkbox" class="source-pref-checkbox" value="Reddit" checked style="width: 16px; height: 16px; accent-color: #3b82f6; cursor: pointer;">
+            <span style="font-size: 13px; color: var(--text-secondary);">Reddit</span>
+          </label>
+          <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none;">
+            <input type="checkbox" class="source-pref-checkbox" value="LinkedIn" checked style="width: 16px; height: 16px; accent-color: #3b82f6; cursor: pointer;">
+            <span style="font-size: 13px; color: var(--text-secondary);">LinkedIn</span>
+          </label>
+          <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none;">
+            <input type="checkbox" class="source-pref-checkbox" value="General web pages" checked style="width: 16px; height: 16px; accent-color: #3b82f6; cursor: pointer;">
+            <span style="font-size: 13px; color: var(--text-secondary);">General web pages</span>
+          </label>
+        </div>
+        <div class="field-hint" style="font-size: 11px; margin-top: 4px;">
+          💡 We’ll automatically tag each saved item with the right source, so your Notion database stays organized. You can change this later anytime.
+        </div>
+      </div>
+
+      <div class="divider" style="margin-bottom: 24px;"></div>
+
+      <!-- Access Token -->
+      <div class="form-group">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <label class="field-label" for="apiKeyInput">Notion Access Token</label>
+          <span class="edit-link" id="editApiKeyBtn" style="display: none; font-size: 11px; color: #a5b4fc; cursor: pointer; text-decoration: underline; font-weight: 500;">Edit</span>
+        </div>
+        <div class="field-hint">Paste your secret token (starts with <code>ntn_</code> or <code>secret_</code>).</div>
+        <div class="input-container">
+          <input type="password" id="apiKeyInput" class="field-input"
+            placeholder="Paste your secret token (starts with ntn_ or secret_)" autocomplete="off" spellcheck="false">
+          <button type="button" class="eye-toggle-btn" data-target="apiKeyInput" title="Toggle visibility">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+            </svg>
+          </button>
+        </div>
+        <div class="field-validation" id="apiKeyValidation"></div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Database URL or ID -->
+      <div class="form-group">
+        <label class="field-label" for="dbInput">Notion Database Link</label>
+        <div class="field-hint">Right-click your database → Copy link, then paste it below.</div>
+        <div class="input-container">
+          <input type="password" id="dbInput" class="field-input" placeholder="Paste your database URL" autocomplete="off"
+            spellcheck="false">
+          <button type="button" class="eye-toggle-btn" data-target="dbInput" title="Toggle visibility">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+            </svg>
+          </button>
+        </div>
+        <div class="field-validation" id="dbValidation"></div>
+        <!-- Extracted ID preview -->
+        <div class="extracted-id" id="extractedIdBox">
+          <span class="id-label">ID found:</span>
+          <span class="id-value" id="extractedIdValue"></span>
+        </div>
+      </div>
+
+      <!-- Connection result -->
+      <div class="conn-result" id="connResult">
+        <span class="result-icon" id="connResultIcon"></span>
+        <div class="result-body">
+          <div class="result-title" id="connResultTitle"></div>
+          <div class="result-detail" id="connResultDetail"></div>
+        </div>
+      </div>
+
+      <!-- Saved confirmation -->
+      <div class="saved-banner" id="savedBanner">
+        <span>✓</span>
+        <span>Credentials saved successfully! Let's wrap up.</span>
+      </div>
+
+      <div style="font-size: 11px; color: var(--text-muted); margin-top: 10px; margin-bottom: 5px; text-align: center;">
+        🔒 Credentials are saved locally on this device via secure local storage.
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-secondary" id="step3Back">← Back</button>
+        <button class="btn btn-secondary" id="testConnBtn" style="flex:1.2">Test Connection</button>
+        <button class="btn btn-primary" id="saveSettingsBtn" disabled>Finish Setup</button>
+      </div>
+    </div>
+
+    <!-- ── Step 4: Done! Setup complete ── -->
+    <div class="setup-card" id="step4Card">
+      <div class="step-badge">Step 4 of 4</div>
+      <div class="card-header">
+        <div class="card-icon">🎉</div>
+        <div>
+          <div class="card-title">You're all set!</div>
+          <div class="card-subtitle">Your extension is now connected to Notion.</div>
+        </div>
+      </div>
+
+      <ul class="instruction-list" style="margin-bottom: 20px;">
+        <li style="font-weight: 700; color: var(--text-primary); margin-bottom: 4px;">Start saving:</li>
+        <li>
+          <span class="num">1</span>
+          <span>Click the bookmark button on any X/Twitter post.</span>
+        </li>
+        <li>
+          <span class="num">2</span>
+          <span>Right-click any page → select <strong>"Save to Notion"</strong>.</span>
+        </li>
+        <li>
+          <span class="num">3</span>
+          <span>Use the extension popup to save the current page instantly.</span>
+        </li>
+      </ul>
+
+      <div class="callout info">
+        <span class="callout-icon">💡</span>
+        <span>You can change these settings anytime by clicking the ⚙️ gear icon in the extension popup.</span>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-primary" id="step4Finish">Start Saving</button>
+      </div>
+    </div>
+
+    <!-- Start Over link at the bottom -->
+    <div class="start-over-wrapper">
+      <span class="start-over-link" id="startOverLink">Start Over</span>
+    </div>
+  </div>
+
+  <!-- ── DEDICATED SETTINGS PANEL ── -->
+  <div class="setup-card" id="settingsPanel" style="max-width: 580px; margin: 40px auto; display: none;">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;">
+      <h2 style="font-size: 20px; font-weight: 700; letter-spacing: -0.03em;">Notion Extension Settings</h2>
+      <span class="logo-icon" style="width: 32px; height: 32px; font-size: 16px; margin-bottom: 0;">⚙️</span>
+    </div>
+
+    <!-- API Key -->
+    <div class="form-group">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <label class="field-label" for="settingsApiKeyInput">Notion API Key</label>
+        <span class="edit-link" id="settingsEditApiKeyBtn" style="display: none; font-size: 11px; color: #a5b4fc; cursor: pointer; text-decoration: underline; font-weight: 500;">Edit</span>
+      </div>
+      <div class="field-hint">Your integration token (starts with <code>ntn_</code> or <code>secret_</code>).</div>
+      <div class="input-container">
+        <input type="password" id="settingsApiKeyInput" class="field-input" placeholder="•••••••••••••••••••• (Saved)" autocomplete="off" spellcheck="false">
+        <button type="button" class="eye-toggle-btn" data-target="settingsApiKeyInput" title="Toggle visibility">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+          </svg>
+        </button>
+      </div>
+      <div class="field-validation" id="settingsApiKeyValidation"></div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Database ID -->
+    <div class="form-group">
+      <label class="field-label" for="settingsDbInput">Notion Database ID</label>
+      <div class="field-hint">The 32-character ID of your Notion database. Can paste database URL or ID.</div>
+      <div class="input-container">
+        <input type="password" id="settingsDbInput" class="field-input" placeholder="Paste your database URL or ID" autocomplete="off" spellcheck="false">
+        <button type="button" class="eye-toggle-btn" data-target="settingsDbInput" title="Toggle visibility">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+          </svg>
+        </button>
+      </div>
+      <div class="field-validation" id="settingsDbValidation"></div>
+      <div class="extracted-id" id="settingsExtractedIdBox">
+        <span class="id-label">ID found:</span>
+        <span class="id-value" id="settingsExtractedIdValue"></span>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Feature Toggles -->
+    <div style="margin-bottom: 20px; display: flex; flex-direction: column; gap: 14px;">
+      <h3 style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted);">Feature Options</h3>
+      
+      <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; user-select: none;">
+        <input type="checkbox" id="toggleXBookmarks" style="width: 16px; height: 16px; accent-color: #3b82f6; cursor: pointer;">
+        <span style="font-size: 13px; color: var(--text-secondary);">Enable X/Twitter bookmark auto-save</span>
+      </label>
+
+      <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; user-select: none;">
+        <input type="checkbox" id="toggleInstagram" style="width: 16px; height: 16px; accent-color: #3b82f6; cursor: pointer;">
+        <span style="font-size: 13px; color: var(--text-secondary);">Enable Instagram auto-save</span>
+      </label>
+
+      <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; user-select: none;">
+        <input type="checkbox" id="toggleNotifications" style="width: 16px; height: 16px; accent-color: #3b82f6; cursor: pointer;">
+        <span style="font-size: 13px; color: var(--text-secondary);">Show save notifications (system alerts & toast overlays)</span>
+      </label>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Enabled Sources Section -->
+    <div style="margin-bottom: 20px; display: flex; flex-direction: column; gap: 14px;">
+      <h3 style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted);">Enabled Sources</h3>
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px;">
+        <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none;">
+          <input type="checkbox" class="settings-source-checkbox" value="X / Twitter" checked style="width: 16px; height: 16px; accent-color: #3b82f6; cursor: pointer;">
+          <span style="font-size: 13px; color: var(--text-secondary);">X / Twitter</span>
+        </label>
+        <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none;">
+          <input type="checkbox" class="settings-source-checkbox" value="Instagram" checked style="width: 16px; height: 16px; accent-color: #3b82f6; cursor: pointer;">
+          <span style="font-size: 13px; color: var(--text-secondary);">Instagram</span>
+        </label>
+        <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none;">
+          <input type="checkbox" class="settings-source-checkbox" value="YouTube" checked style="width: 16px; height: 16px; accent-color: #3b82f6; cursor: pointer;">
+          <span style="font-size: 13px; color: var(--text-secondary);">YouTube</span>
+        </label>
+        <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none;">
+          <input type="checkbox" class="settings-source-checkbox" value="Reddit" checked style="width: 16px; height: 16px; accent-color: #3b82f6; cursor: pointer;">
+          <span style="font-size: 13px; color: var(--text-secondary);">Reddit</span>
+        </label>
+        <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none;">
+          <input type="checkbox" class="settings-source-checkbox" value="LinkedIn" checked style="width: 16px; height: 16px; accent-color: #3b82f6; cursor: pointer;">
+          <span style="font-size: 13px; color: var(--text-secondary);">LinkedIn</span>
+        </label>
+        <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none;">
+          <input type="checkbox" class="settings-source-checkbox" value="General web pages" checked style="width: 16px; height: 16px; accent-color: #3b82f6; cursor: pointer;">
+          <span style="font-size: 13px; color: var(--text-secondary);">General web pages</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Connection Status -->
+    <div class="conn-result" id="settingsConnResult">
+      <span class="result-icon" id="settingsConnResultIcon"></span>
+      <div class="result-body">
+        <div class="result-title" id="settingsConnResultTitle"></div>
+        <div class="result-detail" id="settingsConnResultDetail"></div>
+      </div>
+    </div>
+
+    <!-- Saved Confirmation Banner -->
+    <div class="saved-banner" id="settingsSavedBanner">
+      <span>✓</span>
+      <span>Settings saved successfully!</span>
+    </div>
+
+    <div style="font-size: 11px; color: var(--text-muted); margin-top: 10px; margin-bottom: 10px; text-align: center;">
+      🔒 Credentials are saved locally on this device via secure local storage.
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" id="settingsTestConnBtn" style="flex: 1.2">Test Connection</button>
+      <button class="btn btn-primary" id="settingsSaveBtn" disabled>Save Settings</button>
+    </div>
+
+    <div style="margin-top: 24px; text-align: center; border-top: 1px solid var(--border); padding-top: 16px; display: flex; align-items: center; justify-content: center; gap: 20px;">
+      <span class="start-over-link" id="settingsLaunchWizardLink">Launch Setup Wizard</span>
+      <span style="color: var(--text-muted); opacity: 0.5;">|</span>
+      <span class="start-over-link" id="revokeConnectionBtn" style="color: var(--error);">Revoke Connection</span>
+    </div>
+  </div>
+
+  <!-- Revoke Modal Popup overlay -->
+  <div class="modal-overlay" id="revokeConfirmBox">
+    <div class="modal-card">
+      <div class="modal-icon-container">⚠️</div>
+      <div class="modal-title">Revoke Notion Connection?</div>
+      <div class="modal-text">
+        This will delete all saved Notion access tokens, credentials, and configuration settings from this extension. Your Notion bookmarks database itself will NOT be deleted.
+      </div>
+      <div class="btn-row" style="margin-top: 8px; width: 100%; gap: 12px;">
+        <button class="btn btn-secondary" id="cancelRevokeBtn" style="flex: 1;">No, Cancel</button>
+        <button class="btn" id="confirmRevokeBtn" style="background: var(--error); color: white; flex: 1;">Yes, Revoke</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+
+</html>

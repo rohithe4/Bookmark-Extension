@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notion Bookmark</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
+  <style>
+    /* ── Reset & Base ────────────────────────────── */
+    *,
+    *::before,
+    *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #0b0b0c;
+      --surface: #131316;
+      --surface-hover: #1c1c20;
+      --border: rgba(255, 255, 255, 0.05);
+      --text-primary: #f4f4f6;
+      --text-secondary: #9f9fa9;
+      --text-muted: #64646e;
+      --accent: #ffffff;
+      --accent-dim: rgba(255, 255, 255, 0.1);
+      --success: #22c55e;
+      --success-bg: rgba(34, 197, 94, 0.06);
+      --error: #ef4444;
+      --error-bg: rgba(239, 68, 68, 0.06);
+      --warn: #f59e0b;
+      --warn-bg: rgba(245, 158, 11, 0.07);
+      --warn-border: rgba(245, 158, 11, 0.18);
+      --radius: 12px;
+      --radius-sm: 8px;
+      --transition: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+
+      /* Source Colors */
+      --color-youtube: #ff0055;
+      --color-youtube-bg: rgba(255, 0, 85, 0.08);
+      --color-x: #1d9bf0;
+      --color-x-bg: rgba(29, 155, 240, 0.08);
+      --color-instagram: #f77737;
+      --color-instagram-bg: rgba(247, 119, 55, 0.08);
+      --color-website: #8e8ea0;
+      --color-website-bg: rgba(142, 142, 160, 0.08);
+      --color-reddit: #ff4500;
+      --color-reddit-bg: rgba(255, 69, 0, 0.08);
+      --color-linkedin: #0a66c2;
+      --color-linkedin-bg: rgba(10, 102, 194, 0.08);
+    }
+
+    body {
+      width: 360px;
+      min-height: 480px;
+      max-height: 600px;
+      font-family: 'Figtree', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
+      -webkit-font-smoothing: antialiased;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ── Layout ──────────────────────────────────── */
+    .container {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ── Header ──────────────────────────────────── */
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-sm);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .header-text {
+      flex: 1;
+    }
+
+    .header-text h1 {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: var(--text-primary);
+    }
+
+    .header-text p {
+      font-size: 10px;
+      color: var(--text-secondary);
+      margin-top: 1px;
+    }
+
+    .settings-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: var(--radius-sm);
+      background: transparent;
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: all var(--transition);
+      flex-shrink: 0;
+      margin-left: auto;
+    }
+    .settings-btn:hover {
+      background: var(--surface);
+      color: var(--text-primary);
+      border-color: rgba(255,255,255,0.1);
+    }
+
+    /* ── Not-configured warning banner ── */
+    .not-configured-banner {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      background: var(--warn-bg);
+      border: 1px solid var(--warn-border);
+      border-radius: var(--radius-sm);
+      animation: fadeIn 200ms ease;
+    }
+    .not-configured-banner.visible { display: flex; }
+    .ncb-text {
+      flex: 1;
+      font-size: 11px;
+      color: var(--warn);
+      font-weight: 500;
+      line-height: 1.4;
+    }
+    .ncb-link {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--warn);
+      text-decoration: none;
+      white-space: nowrap;
+      border: 1px solid var(--warn-border);
+      padding: 3px 8px;
+      border-radius: 5px;
+      cursor: pointer;
+      background: transparent;
+      font-family: inherit;
+      transition: background var(--transition);
+    }
+    .ncb-link:hover { background: rgba(245,158,11,0.12); }
+
+    /* ── Tab Preview Card ────────────────────────── */
+    .tab-preview {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .tab-title {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-primary);
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .tab-url {
+      font-size: 10px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+    }
+
+    /* ── Save Button ─────────────────────────────── */
+    .save-btn {
+      width: 100%;
+      height: 36px;
+      border: none;
+      border-radius: var(--radius-sm);
+      background: var(--text-primary);
+      color: var(--bg);
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      cursor: pointer;
+      transition: all var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      outline: none;
+      position: relative;
+    }
+
+    .save-btn:hover:not(:disabled) {
+      background: #ffffff;
+      box-shadow: 0 0 12px rgba(255, 255, 255, 0.1);
+    }
+
+    .save-btn:active:not(:disabled) {
+      transform: scale(0.98);
+    }
+
+    .save-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .spinner {
+      width: 12px;
+      height: 12px;
+      border: 2px solid rgba(0, 0, 0, 0.15);
+      border-top-color: var(--bg);
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ── Status Message ──────────────────────────── */
+    .status {
+      font-size: 11px;
+      font-weight: 500;
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      line-height: 1.4;
+      display: none;
+      align-items: flex-start;
+      gap: 8px;
+      animation: fadeIn 200ms ease;
+    }
+
+    .status.visible {
+      display: flex;
+    }
+
+    .status.success {
+      background: var(--success-bg);
+      color: var(--success);
+      border: 1px solid rgba(34, 197, 94, 0.12);
+    }
+
+    .status.error {
+      background: var(--error-bg);
+      color: var(--error);
+      border: 1px solid rgba(239, 68, 68, 0.12);
+    }
+
+    .status-icon {
+      flex-shrink: 0;
+      font-size: 12px;
+      margin-top: 1px;
+    }
+
+    .status-text {
+      word-break: break-word;
+    }
+
+    /* ── Divider ─────────────────────────────────── */
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 2px 0;
+    }
+
+    /* ── Tabs Header ─────────────────────────────── */
+    .tabs-header {
+      display: flex;
+      gap: 4px;
+      padding: 3px;
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      overflow-x: auto;
+      flex-shrink: 0;
+    }
+
+    .tabs-header::-webkit-scrollbar {
+      display: none;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 6px 0;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: all var(--transition);
+      white-space: nowrap;
+      text-align: center;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-primary);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .tab-btn.active {
+      color: var(--bg);
+      background: var(--text-primary);
+    }
+
+    /* ── Bookmarks Container ─────────────────────── */
+    .bookmarks-container {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding-right: 2px;
+    }
+
+    .bookmarks-container::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .bookmarks-container::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .bookmarks-container::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 2px;
+    }
+
+    .bookmarks-container::-webkit-scrollbar-thumb:hover {
+      background: var(--text-muted);
+    }
+
+    /* ── Bookmark Item ───────────────────────────── */
+    .bookmark-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px;
+      padding-right: 32px; /* Prevent delete button overlap */
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      cursor: pointer;
+      transition: all var(--transition);
+      position: relative;
+    }
+
+    .bookmark-item:hover {
+      background: var(--surface-hover);
+      border-color: rgba(255, 255, 255, 0.1);
+      transform: translateY(-1px);
+    }
+
+    .bookmark-item:active {
+      transform: translateY(0);
+    }
+
+    .delete-btn {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 10px;
+      transition: all var(--transition);
+      opacity: 0;
+      z-index: 10;
+    }
+
+    .bookmark-item:hover .delete-btn {
+      opacity: 1;
+    }
+
+    .delete-btn:hover {
+      background: rgba(239, 68, 68, 0.15);
+      color: var(--error);
+      transform: scale(1.1);
+    }
+
+    .bookmark-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .source-tag {
+      font-size: 8px;
+      font-weight: 700;
+      padding: 1px 4px;
+      border-radius: 3px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .source-tag.youtube {
+      color: var(--color-youtube);
+      background: var(--color-youtube-bg);
+    }
+
+    .source-tag.x-twitter {
+      color: var(--color-x);
+      background: var(--color-x-bg);
+    }
+
+    .source-tag.instagram {
+      color: var(--color-instagram);
+      background: var(--color-instagram-bg);
+    }
+
+    .source-tag.website {
+      color: var(--color-website);
+      background: var(--color-website-bg);
+    }
+
+    .source-tag.reddit {
+      color: var(--color-reddit);
+      background: var(--color-reddit-bg);
+    }
+
+    .source-tag.linkedin {
+      color: var(--color-linkedin);
+      background: var(--color-linkedin-bg);
+    }
+
+    .bookmark-time {
+      font-size: 9px;
+      color: var(--text-muted);
+    }
+
+    .bookmark-title {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-primary);
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .bookmark-url {
+      font-size: 9px;
+      color: var(--text-muted);
+      font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ── Skeletons ───────────────────────────────── */
+    .skeleton-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      animation: pulse 1.5s infinite ease-in-out;
+    }
+
+    .skeleton-line {
+      height: 7px;
+      background: rgba(255, 255, 255, 0.04);
+      border-radius: 4px;
+    }
+
+    .skeleton-line.short {
+      width: 25%;
+    }
+
+    .skeleton-line.long {
+      width: 75%;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 0.6; }
+      50% { opacity: 0.3; }
+      100% { opacity: 0.6; }
+    }
+
+    .list-message {
+      text-align: center;
+      padding: 24px 12px;
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+
+    .list-message.error {
+      color: var(--error);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div class="header-icon">📌</div>
+      <div class="header-text">
+        <h1>Notion Bookmark</h1>
+        <p>Save this tab to your Notion database</p>
+      </div>
+      <button class="settings-btn" id="settingsBtn" title="Open settings">⚙️</button>
+    </div>
+
+    <!-- Not-configured warning -->
+    <div class="not-configured-banner" id="notConfiguredBanner">
+      <span>⚠️</span>
+      <span class="ncb-text">Notion is not set up yet.</span>
+      <button class="ncb-link" id="setupBtn">Set up →</button>
+    </div>
+
+    <!-- Tab Preview -->
+    <div class="tab-preview" id="tabPreview">
+      <div class="tab-title" id="tabTitle">Loading tab info…</div>
+      <div class="tab-url" id="tabUrl"></div>
+    </div>
+
+    <!-- Save Button -->
+    <button class="save-btn" id="saveBtn" autofocus>
+      <span id="btnText">Save to Notion</span>
+    </button>
+
+    <!-- Status Message -->
+    <div class="status" id="status" role="alert" aria-live="polite">
+      <span class="status-icon" id="statusIcon"></span>
+      <span class="status-text" id="statusText"></span>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Tabs Header -->
+    <div class="tabs-header">
+      <button class="tab-btn active" data-source="all">All</button>
+      <button class="tab-btn" data-source="YouTube">YouTube</button>
+      <button class="tab-btn" data-source="X / Twitter">X / Twitter</button>
+      <button class="tab-btn" data-source="Instagram">Instagram</button>
+      <button class="tab-btn" data-source="Website">Websites</button>
+    </div>
+
+    <!-- Bookmarks Container -->
+    <div class="bookmarks-container" id="bookmarksList">
+      <div class="skeleton-item"><div class="skeleton-line short"></div><div class="skeleton-line long"></div></div>
+      <div class="skeleton-item"><div class="skeleton-line short"></div><div class="skeleton-line long"></div></div>
+      <div class="skeleton-item"><div class="skeleton-line short"></div><div class="skeleton-line long"></div></div>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
