@@ -113,7 +113,13 @@
       margin-top: 1px;
     }
 
-    .settings-btn {
+    .header-actions {
+      display: flex;
+      gap: 6px;
+      margin-left: auto;
+    }
+
+    .icon-btn {
       width: 28px;
       height: 28px;
       border-radius: var(--radius-sm);
@@ -127,12 +133,17 @@
       color: var(--text-muted);
       transition: all var(--transition);
       flex-shrink: 0;
-      margin-left: auto;
     }
-    .settings-btn:hover {
+    .icon-btn:hover {
       background: var(--surface);
       color: var(--text-primary);
       border-color: rgba(255,255,255,0.1);
+    }
+    
+    .icon-btn.active {
+      color: var(--warn);
+      background: var(--warn-bg);
+      border-color: var(--warn-border);
     }
 
     /* ── Not-configured warning banner ── */
@@ -547,7 +558,16 @@
         <h1>Notion Bookmark</h1>
         <p>Save this tab to your Notion database</p>
       </div>
-      <button class="settings-btn" id="settingsBtn" title="Open settings">⚙️</button>
+      <div class="header-actions">
+        <button class="icon-btn" id="openNotionBtn" title="Open Notion Database" style="display: none;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+        </button>
+        <button class="icon-btn" id="pauseBtn" title="Pause auto-saving for IG/X">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-pause"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-play" style="display: none;"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+        </button>
+        <button class="icon-btn" id="settingsBtn" title="Open settings">⚙️</button>
+      </div>
     </div>
 
     <!-- Not-configured warning -->

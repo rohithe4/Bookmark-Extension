@@ -21,6 +21,10 @@ const DOM = {
   notConfiguredBanner:document.getElementById('notConfiguredBanner'),
   setupBtn:           document.getElementById('setupBtn'),
   tabsHeader:         document.getElementById('tabsHeader'),
+  pauseBtn:           document.getElementById('pauseBtn'),
+  openNotionBtn:      document.getElementById('openNotionBtn'),
+  iconPause:          document.querySelector('.icon-pause'),
+  iconPlay:           document.querySelector('.icon-play'),
 };
 
 /* Short display labels for tab buttons */
@@ -58,6 +62,20 @@ function showStatus(type, message) {
 
 function hideStatus() {
   DOM.status.className = 'status';
+}
+
+function updatePauseUI(isPaused) {
+  if (isPaused) {
+    DOM.pauseBtn.classList.add('active');
+    DOM.pauseBtn.title = "Resume auto-saving for IG/X";
+    DOM.iconPause.style.display = 'none';
+    DOM.iconPlay.style.display = 'block';
+  } else {
+    DOM.pauseBtn.classList.remove('active');
+    DOM.pauseBtn.title = "Pause auto-saving for IG/X";
+    DOM.iconPause.style.display = 'block';
+    DOM.iconPlay.style.display = 'none';
+  }
 }
 
 function getSourceClass(source) {
@@ -221,8 +239,36 @@ function renderBookmarks() {
 async function init() {
   // Check if Notion is configured; show warning banner if not
   try {
-    const data = await chrome.storage.local.get(['notionApiKey', 'notionDatabaseId', 'enabledSources']);
+    const data = await chrome.storage.local.get(['notionApiKey', 'notionDatabaseId', 'enabledSources', 'enableXBookmarks', 'enableInstagram']);
     isConfigured = !!(data.notionApiKey && data.notionDatabaseId);
+    
+    // Set Open Notion button
+    if (data.notionDatabaseId) {
+      DOM.openNotionBtn.style.display = 'flex';
+      DOM.openNotionBtn.addEventListener('click', () => {
+        let dbId = data.notionDatabaseId.replace(/-/g, '');
+        const url = `https://notion.so/${dbId}`;
+        chrome.tabs.create({ url });
+      });
+    }
+
+    // Determine initial pause state
+    const isPaused = (data.enableXBookmarks === false && data.enableInstagram === false);
+    updatePauseUI(isPaused);
+
+    // Bind pause button click
+    DOM.pauseBtn.addEventListener('click', async () => {
+      const currentData = await chrome.storage.local.get(['enableXBookmarks', 'enableInstagram']);
+      const currentlyPaused = (currentData.enableXBookmarks === false && currentData.enableInstagram === false);
+      const newPausedState = !currentlyPaused;
+      
+      await chrome.storage.local.set({
+        enableXBookmarks: !newPausedState,
+        enableInstagram: !newPausedState
+      });
+      updatePauseUI(newPausedState);
+    });
+
     if (!isConfigured) {
       DOM.notConfiguredBanner.classList.add('visible');
       DOM.saveBtn.disabled = true;

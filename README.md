@@ -141,9 +141,6 @@ Contributions are welcome. You can:
 - Suggest features
 - Submit pull requests
 
-## License
-
-MIT License
 
 ## Acknowledgments
 
