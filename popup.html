@@ -313,8 +313,8 @@
     }
 
     .tab-btn {
-      flex: 1;
-      padding: 6px 0;
+      flex-shrink: 0;
+      padding: 6px 10px;
       border: none;
       background: transparent;
       color: var(--text-secondary);
@@ -576,13 +576,9 @@
 
     <div class="divider"></div>
 
-    <!-- Tabs Header -->
-    <div class="tabs-header">
+    <!-- Tabs Header (dynamically populated from enabled sources) -->
+    <div class="tabs-header" id="tabsHeader">
       <button class="tab-btn active" data-source="all">All</button>
-      <button class="tab-btn" data-source="YouTube">YouTube</button>
-      <button class="tab-btn" data-source="X / Twitter">X / Twitter</button>
-      <button class="tab-btn" data-source="Instagram">Instagram</button>
-      <button class="tab-btn" data-source="Website">Websites</button>
     </div>
 
     <!-- Bookmarks Container -->

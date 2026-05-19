@@ -584,16 +584,43 @@ async function performConnectionTest(rawKey, rawDbInput, viewName) {
       if (response.sourceType) {
         savedSourcePropertyType = response.sourceType;
       }
-      showConnResult(
-        targetResult,
-        targetIcon,
-        targetTitle,
-        targetDetail,
-        'success',
-        `✅ Connected successfully!\nDatabase Title: "${response.databaseTitle || 'Saved Bookmarks'}"`,
-        `Required fields verified:\n• Title (type title) ✓\n• URL (type url) ✓\n• Source (type select or multi_select) ✓`
-      );
-      return { success: true, verifiedApiKey: apiKey, verifiedDbId: dbId, sourceType: response.sourceType };
+
+      // If a new database was auto-created, swap the ID
+      let finalDbId = dbId;
+      if (response.newDatabaseId) {
+        finalDbId = response.newDatabaseId;
+        // Update the input field to show the new database ID
+        targetInput.value = finalDbId;
+        targetInput.type = 'text';
+        setFieldState(targetInput, targetValidation, 'success', '✓ Database auto-created');
+
+        // Update extracted ID box
+        const idBox = isSettings ? settingsExtractedIdBox : extractedIdBox;
+        const idVal = isSettings ? settingsExtractedIdValue : extractedIdValue;
+        idVal.textContent = formatAsUuid(finalDbId);
+        idBox.classList.add('visible');
+
+        showConnResult(
+          targetResult,
+          targetIcon,
+          targetTitle,
+          targetDetail,
+          'success',
+          `✅ Database created & connected!\nDatabase: "${response.databaseTitle || 'Saved Bookmarks'}"`,
+          `We auto-created a database table inside your Notion page with:\n• Title (type title) ✓\n• URL (type url) ✓\n• Source (type multi_select) ✓\n\nYour selected sources have been added as options.`
+        );
+      } else {
+        showConnResult(
+          targetResult,
+          targetIcon,
+          targetTitle,
+          targetDetail,
+          'success',
+          `✅ Connected successfully!\nDatabase Title: "${response.databaseTitle || 'Saved Bookmarks'}"`,
+          `Required fields verified:\n• Title (type title) ✓\n• URL (type url) ✓\n• Source (type select or multi_select) ✓`
+        );
+      }
+      return { success: true, verifiedApiKey: apiKey, verifiedDbId: finalDbId, sourceType: response.sourceType };
     } else {
       if (response?.error === 'MISSING_PROPERTIES') {
         const missing = response.missingProperties.map(p => `  • ${p}`).join('\n');

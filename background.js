@@ -664,6 +664,68 @@ async function testNotionConnection(apiKey, databaseId, selectedSources = []) {
     const data = await res.json().catch(() => ({}));
 
     if (!res.ok) {
+      // If it's a 400/404, the user might have provided a Page ID instead of a Database ID
+      if (res.status === 404 || res.status === 400 || (data && data.code === 'object_not_found') || (data && data.code === 'validation_error')) {
+        const pageRes = await fetch(`https://api.notion.com/v1/pages/${databaseId}`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Notion-Version': NOTION_VERSION,
+            'Content-Type': 'application/json',
+          },
+        });
+        
+        if (pageRes.ok) {
+          // The ID is a valid page — auto-create a database inside it
+          const optionsPayload = (selectedSources || []).map(src => ({ name: src }));
+          
+          const createBody = {
+            parent: { type: 'page_id', page_id: databaseId },
+            title: [
+              { type: 'text', text: { content: 'Saved Bookmarks' } }
+            ],
+            properties: {
+              Title: { title: {} },
+              URL: { url: {} },
+              Source: {
+                multi_select: {
+                  options: optionsPayload.length > 0 ? optionsPayload : []
+                }
+              }
+            }
+          };
+
+          const createRes = await fetch(`https://api.notion.com/v1/databases`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${apiKey}`,
+              'Notion-Version': NOTION_VERSION,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(createBody)
+          });
+
+          if (createRes.ok) {
+            const createData = await createRes.json();
+            console.log('[background] Auto-created database inside page:', createData.id);
+            return {
+              success: true,
+              databaseTitle: 'Saved Bookmarks',
+              sourceType: 'multi_select',
+              newDatabaseId: createData.id
+            };
+          } else {
+            const createErr = await createRes.json().catch(() => ({}));
+            console.warn('[background] Failed to auto-create database:', createErr.message);
+            return {
+              success: false,
+              error: 'CONNECTION_FAILED',
+              message: `Could not create database inside this page: ${createErr.message || 'Unknown error'}`
+            };
+          }
+        }
+      }
+
       return {
         success: false,
         error: 'CONNECTION_FAILED',

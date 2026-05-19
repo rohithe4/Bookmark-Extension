@@ -20,6 +20,13 @@ const DOM = {
   settingsBtn:        document.getElementById('settingsBtn'),
   notConfiguredBanner:document.getElementById('notConfiguredBanner'),
   setupBtn:           document.getElementById('setupBtn'),
+  tabsHeader:         document.getElementById('tabsHeader'),
+};
+
+/* Short display labels for tab buttons */
+const TAB_LABELS = {
+  'X / Twitter': 'X',
+  'General web pages': 'Web',
 };
 
 let currentTab = null;
@@ -214,13 +221,15 @@ function renderBookmarks() {
 async function init() {
   // Check if Notion is configured; show warning banner if not
   try {
-    const data = await chrome.storage.local.get(['notionApiKey', 'notionDatabaseId']);
+    const data = await chrome.storage.local.get(['notionApiKey', 'notionDatabaseId', 'enabledSources']);
     isConfigured = !!(data.notionApiKey && data.notionDatabaseId);
     if (!isConfigured) {
       DOM.notConfiguredBanner.classList.add('visible');
       DOM.saveBtn.disabled = true;
       DOM.btnText.textContent = 'Setup required';
     }
+    // Build dynamic source filter tabs
+    buildSourceTabs(data.enabledSources);
   } catch (e) { /* storage unavailable */ }
 
   try {
@@ -302,20 +311,45 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-// Category filtering tab click listeners
-document.querySelectorAll('.tab-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    // Remove active styling from other buttons
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    
-    // Add active styling to clicked button
-    btn.classList.add('active');
-    
-    // Update category and render
-    activeCategory = btn.getAttribute('data-source');
-    renderBookmarks();
+/**
+ * Dynamically builds source filter tabs based on user's enabled sources.
+ */
+function buildSourceTabs(enabledSources) {
+  const sources = enabledSources || ['X / Twitter', 'Instagram', 'YouTube', 'Reddit', 'LinkedIn', 'General web pages'];
+
+  // Clear existing tabs (keep the "All" button)
+  DOM.tabsHeader.innerHTML = '';
+
+  // Always add "All" first
+  const allBtn = document.createElement('button');
+  allBtn.className = 'tab-btn active';
+  allBtn.setAttribute('data-source', 'all');
+  allBtn.textContent = 'All';
+  DOM.tabsHeader.appendChild(allBtn);
+
+  // Add a tab for each enabled source
+  sources.forEach(source => {
+    const btn = document.createElement('button');
+    btn.className = 'tab-btn';
+    btn.setAttribute('data-source', source);
+    btn.textContent = TAB_LABELS[source] || source;
+    DOM.tabsHeader.appendChild(btn);
   });
-});
+
+  // Bind click listeners to all tabs
+  bindTabListeners();
+}
+
+function bindTabListeners() {
+  DOM.tabsHeader.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      DOM.tabsHeader.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeCategory = btn.getAttribute('data-source');
+      renderBookmarks();
+    });
+  });
+}
 
 /* ── Boot ─────────────────────────────────────────── */
 init();

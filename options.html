@@ -789,49 +789,42 @@
       </div>
     </div>
 
-    <!-- ── Step 1: Set up your Notion database ── -->
+    <!-- ── Step 1: Set up your Notion page ── -->
     <div class="setup-card active" id="step1Card">
       <div class="step-badge">Step 1 of 4</div>
       <div class="card-header">
         <div class="card-icon">🗄️</div>
         <div>
-          <div class="card-title">Set up your Notion database</div>
-          <div class="card-subtitle">First, create a database in Notion to store your saved bookmarks.</div>
+          <div class="card-title">Set up your Notion page</div>
+          <div class="card-subtitle">Create or pick a page in Notion where your bookmarks will be saved. We'll create the database table for you automatically.</div>
         </div>
       </div>
 
       <ul class="instruction-list">
         <li>
           <span class="num">1</span>
-          <span>Open Notion and go to any page.</span>
+          <span>Open Notion and create a new page (or use an existing one).</span>
         </li>
         <li>
           <span class="num">2</span>
-          <span>Type <code class="highlight-badge">/table</code> and choose <strong>"Table - Inline"</strong>.</span>
+          <span>Name it something like <strong>"Saved Bookmarks"</strong>.</span>
         </li>
         <li>
           <span class="num">3</span>
-          <span>Name it "Saved Bookmarks" (or anything you like).</span>
-        </li>
-        <li>
-          <span class="num">4</span>
-          <span>Make sure it has these properties (columns):</span>
-        </li>
-        <li style="padding-left: 30px; flex-direction: column; gap: 8px;">
-          <div>• <span class="highlight-badge">Title</span> (already exists by default ✓)</div>
-          <div>• <span class="highlight-badge">URL</span> (add this: type <strong>URL</strong>)</div>
-          <div>• <span class="highlight-badge">Source</span> (add this: type <strong>Multi-select</strong> or
-            <strong>Select</strong>)
-          </div>
+          <span>That's it! You'll paste the page link in Step 3 and we'll set up the table automatically.</span>
         </li>
       </ul>
 
+      <div class="callout info" style="margin-top: 16px;">
+        <span class="callout-icon">✨</span>
+        <span>The extension will auto-create a database inside your page with the correct <strong>Title</strong>, <strong>URL</strong>, and <strong>Source</strong> columns. No manual setup needed!</span>
+      </div>
+
       <!-- Help links -->
       <div class="help-section">
-        <div class="help-title">New to Notion databases?</div>
+        <div class="help-title">Already have a database?</div>
         <ul class="help-links-list">
-          <li><a href="https://www.youtube.com/watch?v=d3H07kNpUdQ" target="_blank">🎥 Watch: Creating a database ↗</a> (3 min video)</li>
-          <li><a href="https://www.notion.com/help/create-a-database" target="_blank">📖 Read: Notion's database guide ↗</a></li>
+          <li>If you already created a Notion database with <strong>Title</strong>, <strong>URL</strong>, and <strong>Source</strong> columns, just paste its link in Step 3 — we'll detect it automatically.</li>
         </ul>
       </div>
 
@@ -981,10 +974,10 @@
 
       <!-- Database URL or ID -->
       <div class="form-group">
-        <label class="field-label" for="dbInput">Notion Database Link</label>
-        <div class="field-hint">Right-click your database → Copy link, then paste it below.</div>
+        <label class="field-label" for="dbInput">Notion Page or Database Link</label>
+        <div class="field-hint">Right-click your page (or database) → Copy link, then paste it below.</div>
         <div class="input-container">
-          <input type="password" id="dbInput" class="field-input" placeholder="Paste your database URL" autocomplete="off"
+          <input type="password" id="dbInput" class="field-input" placeholder="Paste your Notion page or database URL" autocomplete="off"
             spellcheck="false">
           <button type="button" class="eye-toggle-btn" data-target="dbInput" title="Toggle visibility">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
