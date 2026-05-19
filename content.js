@@ -188,6 +188,15 @@ function handleXClick(target) {
           log(`Scraped X tweet image URL: ${imageUrl}`);
         }
       }
+
+      // 3. Fallback to user profile avatar if no post image is found
+      if (!imageUrl) {
+        const avatarEl = tweetEl.querySelector('[data-testid="Tweet-User-Avatar"] img, img[src*="/profile_images/"]');
+        if (avatarEl && avatarEl.src) {
+          imageUrl = avatarEl.src;
+          log(`Using X profile avatar as fallback image: ${imageUrl}`);
+        }
+      }
     }
 
     // Fallbacks
@@ -356,6 +365,15 @@ function handleInstagramClick(target) {
         if (src && !src.startsWith('blob:')) {
           imageUrl = src;
           log(`Scraped Instagram high-res post image URL: ${imageUrl}`);
+        }
+      }
+
+      // 2. Fallback to user profile avatar if no post image is found
+      if (!imageUrl) {
+        const avatarEl = postEl.querySelector('header img, img[src*="/t51.2885-19/"], canvas + img, [style*="canvas"] + img');
+        if (avatarEl && avatarEl.src && !avatarEl.src.startsWith('blob:')) {
+          imageUrl = avatarEl.src;
+          log(`Using Instagram profile avatar as fallback image: ${imageUrl}`);
         }
       }
     }

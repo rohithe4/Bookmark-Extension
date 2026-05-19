@@ -388,6 +388,15 @@ async function getXPreviewImage(url, existingImage) {
           }
         }
 
+        // 5. Fallback to user profile image
+        if (!candidate && data?.user?.profile_image_url_https) {
+          let userImg = data.user.profile_image_url_https;
+          if (userImg.includes('_normal.')) {
+            userImg = userImg.replace('_normal.', '_400x400.');
+          }
+          candidate = userImg;
+        }
+
         if (isValidImageUrl(candidate)) {
           console.log(`[background] getXPreviewImage: Found image via X Syndication API: ${candidate}`);
           return candidate;
