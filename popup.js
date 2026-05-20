@@ -29,8 +29,8 @@ const DOM = {
 
 /* Short display labels for tab buttons */
 const TAB_LABELS = {
-  'X / Twitter': 'X',
-  'General web pages': 'Web',
+  [APP_CONFIG.SOURCE_LABELS.X]: 'X',
+  [APP_CONFIG.SOURCE_LABELS.GENERAL]: 'Web',
 };
 
 let currentTab = null;
@@ -79,11 +79,11 @@ function updatePauseUI(isPaused) {
 }
 
 function getSourceClass(source) {
-  if (source === 'X / Twitter') return 'x-twitter';
-  if (source === 'YouTube') return 'youtube';
-  if (source === 'Instagram') return 'instagram';
-  if (source === 'Reddit') return 'reddit';
-  if (source === 'LinkedIn') return 'linkedin';
+  if (source === APP_CONFIG.SOURCE_LABELS.X) return 'x-twitter';
+  if (source === APP_CONFIG.SOURCE_LABELS.YOUTUBE) return 'youtube';
+  if (source === APP_CONFIG.SOURCE_LABELS.INSTAGRAM) return 'instagram';
+  if (source === APP_CONFIG.SOURCE_LABELS.REDDIT) return 'reddit';
+  if (source === APP_CONFIG.SOURCE_LABELS.LINKEDIN) return 'linkedin';
   return 'website';
 }
 
@@ -122,7 +122,7 @@ async function fetchBookmarks() {
   `;
 
   try {
-    const response = await chrome.runtime.sendMessage({ action: 'GET_BOOKMARKS' });
+    const response = await chrome.runtime.sendMessage({ action: APP_CONFIG.ACTIONS.GET_BOOKMARKS });
     if (response?.success) {
       allBookmarks = response.bookmarks || [];
       renderBookmarks();
@@ -200,7 +200,7 @@ function renderBookmarks() {
 
         try {
           const response = await chrome.runtime.sendMessage({
-            action: 'DELETE_BOOKMARK',
+            action: APP_CONFIG.ACTIONS.DELETE_BOOKMARK,
             pageId: pageId
           });
 
@@ -310,7 +310,7 @@ async function handleSave() {
 
   try {
     const response = await chrome.runtime.sendMessage({
-      action: 'SAVE_TO_NOTION',
+      action: APP_CONFIG.ACTIONS.SAVE_TO_NOTION,
       data: {
         title: currentTab.title,
         url: currentTab.url,
@@ -361,7 +361,12 @@ document.addEventListener('keydown', (e) => {
  * Dynamically builds source filter tabs based on user's enabled sources.
  */
 function buildSourceTabs(enabledSources) {
-  const sources = enabledSources || ['X / Twitter', 'Instagram', 'YouTube', 'General web pages'];
+  const sources = enabledSources || [
+    APP_CONFIG.SOURCE_LABELS.X,
+    APP_CONFIG.SOURCE_LABELS.INSTAGRAM,
+    APP_CONFIG.SOURCE_LABELS.YOUTUBE,
+    APP_CONFIG.SOURCE_LABELS.GENERAL
+  ];
 
   // Clear existing tabs (keep the "All" button)
   DOM.tabsHeader.innerHTML = '';

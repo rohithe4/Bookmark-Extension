@@ -385,7 +385,7 @@ if (confirmRevokeBtn) {
     }
 
     // Notify background thread to clear state
-    chrome.runtime.sendMessage({ action: 'RELOAD_SETTINGS' }).catch(() => {});
+    chrome.runtime.sendMessage({ action: APP_CONFIG.ACTIONS.RELOAD_SETTINGS }).catch(() => {});
 
     // Route back to onboarding wizard
     showView('wizard');
@@ -574,7 +574,7 @@ async function performConnectionTest(rawKey, rawDbInput, viewName) {
 
   try {
     const response = await chrome.runtime.sendMessage({
-      action: 'TEST_NOTION_CONNECTION',
+      action: APP_CONFIG.ACTIONS.TEST_NOTION_CONNECTION,
       apiKey,
       databaseId: dbId,
       selectedSources
@@ -734,7 +734,7 @@ async function saveConfiguration(viewName) {
     });
 
     // Notify background worker
-    chrome.runtime.sendMessage({ action: 'RELOAD_SETTINGS' }).catch(() => {});
+    chrome.runtime.sendMessage({ action: APP_CONFIG.ACTIONS.RELOAD_SETTINGS }).catch(() => {});
 
     // Save in-memory cache reference
     savedApiKey = apiKey;
@@ -842,7 +842,12 @@ async function loadExistingSettings() {
     }
 
     // Source preferences
-    const sourcesList = data.enabledSources || ['X / Twitter', 'Instagram', 'YouTube', 'General web pages'];
+    const sourcesList = data.enabledSources || [
+      APP_CONFIG.SOURCE_LABELS.X,
+      APP_CONFIG.SOURCE_LABELS.INSTAGRAM,
+      APP_CONFIG.SOURCE_LABELS.YOUTUBE,
+      APP_CONFIG.SOURCE_LABELS.GENERAL
+    ];
     sourcePrefCheckboxes.forEach(cb => {
       cb.checked = sourcesList.includes(cb.value);
     });
@@ -864,7 +869,44 @@ async function loadExistingSettings() {
   }
 }
 
+function initializeDynamicElements() {
+  // Populate help and integration links
+  const notionConnectionsLink = document.getElementById('notionConnectionsLink');
+  if (notionConnectionsLink) {
+    notionConnectionsLink.href = APP_CONFIG.URLS.NOTION_CONNECTIONS;
+  }
+  const notionConnectionsHelpLink = document.getElementById('notionConnectionsHelpLink');
+  if (notionConnectionsHelpLink) {
+    notionConnectionsHelpLink.href = APP_CONFIG.URLS.NOTION_CONNECTIONS_HELP;
+  }
+
+  // Populate source checkboxes dynamically from configuration
+  const sourceKeys = [
+    APP_CONFIG.SOURCE_LABELS.X,
+    APP_CONFIG.SOURCE_LABELS.INSTAGRAM,
+    APP_CONFIG.SOURCE_LABELS.YOUTUBE,
+    APP_CONFIG.SOURCE_LABELS.GENERAL
+  ];
+
+  sourcePrefCheckboxes.forEach((cb, idx) => {
+    if (sourceKeys[idx]) {
+      cb.value = sourceKeys[idx];
+      const span = cb.nextElementSibling;
+      if (span) span.textContent = sourceKeys[idx];
+    }
+  });
+
+  settingsSourceCheckboxes.forEach((cb, idx) => {
+    if (sourceKeys[idx]) {
+      cb.value = sourceKeys[idx];
+      const span = cb.nextElementSibling;
+      if (span) span.textContent = sourceKeys[idx];
+    }
+  });
+}
+
 /* ══════════════════════════════════════
    BOOT
    ══════════════════════════════════════ */
+initializeDynamicElements();
 loadExistingSettings();

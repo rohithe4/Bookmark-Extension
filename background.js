@@ -10,8 +10,10 @@
 
 'use strict';
 
+importScripts('constants.js');
+
 const NOTION_API_URL = 'https://api.notion.com/v1/pages';
-const NOTION_VERSION = '2022-06-28';
+const NOTION_VERSION = APP_CONFIG.NOTION_API_VERSION;
 
 /**
  * Loads Notion credentials from chrome.storage.local.
@@ -34,26 +36,26 @@ async function getCredentials() {
  * Automatically determines the category/source name based on URL hostnames.
  */
 function getSourceFromUrl(url) {
-  if (!url) return 'General web pages';
+  if (!url) return APP_CONFIG.SOURCE_LABELS.GENERAL;
   try {
     const domain = new URL(url).hostname.toLowerCase();
     if (domain.includes('youtube.com') || domain.includes('youtu.be')) {
-      return 'YouTube';
+      return APP_CONFIG.SOURCE_LABELS.YOUTUBE;
     }
     if (domain.includes('x.com') || domain.includes('twitter.com')) {
-      return 'X / Twitter';
+      return APP_CONFIG.SOURCE_LABELS.X;
     }
     if (domain.includes('instagram.com')) {
-      return 'Instagram';
+      return APP_CONFIG.SOURCE_LABELS.INSTAGRAM;
     }
     if (domain.includes('reddit.com')) {
-      return 'Reddit';
+      return APP_CONFIG.SOURCE_LABELS.REDDIT;
     }
     if (domain.includes('linkedin.com')) {
-      return 'LinkedIn';
+      return APP_CONFIG.SOURCE_LABELS.LINKEDIN;
     }
   } catch (e) {}
-  return 'General web pages';
+  return APP_CONFIG.SOURCE_LABELS.GENERAL;
 }
 
 /**
@@ -298,7 +300,7 @@ async function fetchMetadata(url) {
 async function checkIfUrlExists(url, token, databaseId) {
   const queryUrl = `https://api.notion.com/v1/databases/${databaseId}/query`;
   const body = {
-    filter: { property: "URL", url: { equals: url } },
+    filter: { property: APP_CONFIG.NOTION_PROPERTIES.URL, url: { equals: url } },
     page_size: 1
   };
 
@@ -459,15 +461,15 @@ async function saveToNotion(title, url, tabId = null, initialImageUrl = null) {
   const body = {
     parent: { database_id: databaseId },
     properties: {
-      Title: { title: [{ text: { content: finalTitle } }] },
-      URL: { url: url }
+      [APP_CONFIG.NOTION_PROPERTIES.TITLE]: { title: [{ text: { content: finalTitle } }] },
+      [APP_CONFIG.NOTION_PROPERTIES.URL]: { url: url }
     },
   };
 
   if (sourcePropertyType === 'select') {
-    body.properties.Source = { select: { name: sourceName } };
+    body.properties[APP_CONFIG.NOTION_PROPERTIES.SOURCE] = { select: { name: sourceName } };
   } else {
-    body.properties.Source = { multi_select: [{ name: sourceName }] };
+    body.properties[APP_CONFIG.NOTION_PROPERTIES.SOURCE] = { multi_select: [{ name: sourceName }] };
   }
 
   if (imageUrl) {
@@ -530,16 +532,17 @@ async function getBookmarks() {
 
     const data = await res.json();
     const bookmarks = (data.results || []).map(page => {
-      const titleProp = page.properties?.Title?.title || [];
+      const titleProp = page.properties?.[APP_CONFIG.NOTION_PROPERTIES.TITLE]?.title || [];
       const title = titleProp.map(t => t.plain_text).join('') || 'Untitled';
-      const url = page.properties?.URL?.url || '';
-      let source = 'General web pages';
-      if (page.properties?.Source) {
-        if (page.properties.Source.type === 'select') {
-          source = page.properties.Source.select?.name || 'General web pages';
-        } else if (page.properties.Source.type === 'multi_select') {
-          const sourceProp = page.properties.Source.multi_select || [];
-          source = sourceProp[0]?.name || 'General web pages';
+      const url = page.properties?.[APP_CONFIG.NOTION_PROPERTIES.URL]?.url || '';
+      let source = APP_CONFIG.SOURCE_LABELS.GENERAL;
+      if (page.properties?.[APP_CONFIG.NOTION_PROPERTIES.SOURCE]) {
+        const sourcePropObj = page.properties[APP_CONFIG.NOTION_PROPERTIES.SOURCE];
+        if (sourcePropObj.type === 'select') {
+          source = sourcePropObj.select?.name || APP_CONFIG.SOURCE_LABELS.GENERAL;
+        } else if (sourcePropObj.type === 'multi_select') {
+          const sourceProp = sourcePropObj.multi_select || [];
+          source = sourceProp[0]?.name || APP_CONFIG.SOURCE_LABELS.GENERAL;
         }
       }
       return { id: page.id, title, url, source, createdTime: page.created_time };
@@ -587,7 +590,7 @@ async function deleteBookmark(pageId) {
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
   /* ── Save bookmark ── */
-  if (message.action === 'SAVE_TO_NOTION') {
+  if (message.action === APP_CONFIG.ACTIONS.SAVE_TO_NOTION) {
     const title    = message.data?.title    || message.title;
     const url      = message.data?.url      || message.url;
     const imageUrl = message.data?.imageUrl || message.imageUrl || null;
@@ -610,19 +613,19 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 
   /* ── Get bookmarks list ── */
-  if (message.action === 'GET_BOOKMARKS') {
+  if (message.action === APP_CONFIG.ACTIONS.GET_BOOKMARKS) {
     getBookmarks().then(sendResponse);
     return true;
   }
 
   /* ── Delete bookmark ── */
-  if (message.action === 'DELETE_BOOKMARK') {
+  if (message.action === APP_CONFIG.ACTIONS.DELETE_BOOKMARK) {
     deleteBookmark(message.pageId).then(sendResponse);
     return true;
   }
 
   /* ── Save X/Twitter bookmark (from content script) ── */
-  if (message.action === 'SAVE_X_BOOKMARK') {
+  if (message.action === APP_CONFIG.ACTIONS.SAVE_X_BOOKMARK) {
     const title    = message.title;
     const url      = message.url;
     const imageUrl = message.imageUrl || null;
@@ -637,7 +640,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 
   /* ── Test Notion connection (from options page) ── */
-  if (message.action === 'TEST_NOTION_CONNECTION') {
+  if (message.action === APP_CONFIG.ACTIONS.TEST_NOTION_CONNECTION) {
     const { apiKey, databaseId, selectedSources } = message;
     if (!apiKey || !databaseId) {
       sendResponse({ success: false, error: 'Missing apiKey or databaseId.' });
@@ -648,7 +651,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 
   /* ── Reload settings signal (no-op; credentials are fetched fresh on each call) ── */
-  if (message.action === 'RELOAD_SETTINGS') {
+  if (message.action === APP_CONFIG.ACTIONS.RELOAD_SETTINGS) {
     sendResponse({ success: true });
     return false;
   }
@@ -694,9 +697,9 @@ async function testNotionConnection(apiKey, databaseId, selectedSources = []) {
               { type: 'text', text: { content: 'Saved Bookmarks' } }
             ],
             properties: {
-              Title: { title: {} },
-              URL: { url: {} },
-              Source: {
+              [APP_CONFIG.NOTION_PROPERTIES.TITLE]: { title: {} },
+              [APP_CONFIG.NOTION_PROPERTIES.URL]: { url: {} },
+              [APP_CONFIG.NOTION_PROPERTIES.SOURCE]: {
                 multi_select: {
                   options: optionsPayload.length > 0 ? optionsPayload : []
                 }
@@ -748,16 +751,16 @@ async function testNotionConnection(apiKey, databaseId, selectedSources = []) {
     const missing = [];
 
     // Title is required by default, but we should make sure it exists with 'title' type
-    if (!properties.Title || properties.Title.type !== 'title') {
-      missing.push('Title (type: Title)');
+    if (!properties[APP_CONFIG.NOTION_PROPERTIES.TITLE] || properties[APP_CONFIG.NOTION_PROPERTIES.TITLE].type !== 'title') {
+      missing.push(`${APP_CONFIG.NOTION_PROPERTIES.TITLE} (type: Title)`);
     }
-    if (!properties.URL || properties.URL.type !== 'url') {
-      missing.push('URL (type: URL)');
+    if (!properties[APP_CONFIG.NOTION_PROPERTIES.URL] || properties[APP_CONFIG.NOTION_PROPERTIES.URL].type !== 'url') {
+      missing.push(`${APP_CONFIG.NOTION_PROPERTIES.URL} (type: URL)`);
     }
     
     // Only fail if Source exists but is of an invalid type
-    if (properties.Source && properties.Source.type !== 'multi_select' && properties.Source.type !== 'select') {
-      missing.push('Source (must be Select or Multi-select type, but found ' + properties.Source.type + ')');
+    if (properties[APP_CONFIG.NOTION_PROPERTIES.SOURCE] && properties[APP_CONFIG.NOTION_PROPERTIES.SOURCE].type !== 'multi_select' && properties[APP_CONFIG.NOTION_PROPERTIES.SOURCE].type !== 'select') {
+      missing.push(`${APP_CONFIG.NOTION_PROPERTIES.SOURCE} (must be Select or Multi-select type, but found ` + properties[APP_CONFIG.NOTION_PROPERTIES.SOURCE].type + ')');
     }
 
     if (missing.length > 0) {
@@ -769,7 +772,7 @@ async function testNotionConnection(apiKey, databaseId, selectedSources = []) {
     }
 
     // Determine target type (default to multi_select if it does not exist)
-    const sourceType = properties.Source ? properties.Source.type : 'multi_select';
+    const sourceType = properties[APP_CONFIG.NOTION_PROPERTIES.SOURCE] ? properties[APP_CONFIG.NOTION_PROPERTIES.SOURCE].type : 'multi_select';
 
     // Auto-create/update Source options in database schema
     if (selectedSources && selectedSources.length > 0) {
@@ -777,7 +780,7 @@ async function testNotionConnection(apiKey, databaseId, selectedSources = []) {
       
       const patchBody = {
         properties: {
-          Source: {
+          [APP_CONFIG.NOTION_PROPERTIES.SOURCE]: {
             [sourceType]: {
               options: optionsPayload
             }
@@ -822,9 +825,9 @@ function getFallbackTitleFromUrl(url) {
   try {
     const parsed = new URL(url);
     const source = getSourceFromUrl(url);
-    if (source === 'YouTube') return 'Saved YouTube Video';
-    if (source === 'X / Twitter') return 'Saved X Tweet';
-    if (source === 'Instagram') return 'Saved Instagram Post';
+    if (source === APP_CONFIG.SOURCE_LABELS.YOUTUBE) return 'Saved YouTube Video';
+    if (source === APP_CONFIG.SOURCE_LABELS.X) return 'Saved X Tweet';
+    if (source === APP_CONFIG.SOURCE_LABELS.INSTAGRAM) return 'Saved Instagram Post';
     return `Saved Link: ${parsed.hostname}`;
   } catch (e) {
     return 'Saved Link';
@@ -872,9 +875,9 @@ chrome.runtime.onInstalled.addListener((details) => {
       if (tab.id && tab.url && !tab.url.startsWith('chrome://')) {
         chrome.scripting.executeScript({
           target: { tabId: tab.id },
-          files: ['content.js']
+          files: ['constants.js', 'content.js']
         }).then(() => {
-          console.log(`[background] Programmatically injected content.js into tab ${tab.id} (${tab.url})`);
+          console.log(`[background] Programmatically injected constants.js and content.js into tab ${tab.id} (${tab.url})`);
         }).catch(err => {
           console.warn(`[background] Programmatic injection failed for tab ${tab.id}:`, err.message);
         });

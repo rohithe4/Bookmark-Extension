@@ -439,7 +439,7 @@ function sendToNotion(title, url, imageUrl = null) {
   }
 
   const isX = window.location.hostname.includes('x.com') || window.location.hostname.includes('twitter.com');
-  const action = isX ? 'SAVE_X_BOOKMARK' : 'SAVE_TO_NOTION';
+  const action = isX ? APP_CONFIG.ACTIONS.SAVE_X_BOOKMARK : APP_CONFIG.ACTIONS.SAVE_TO_NOTION;
 
   log(`Sending to Notion [${action}]: "${title}" -> ${cleanUrl} (Image: ${imageUrl})`);
 

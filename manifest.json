@@ -21,7 +21,7 @@
         "*://twitter.com/*",
         "*://*.instagram.com/*"
       ],
-      "js": ["content.js"],
+      "js": ["constants.js", "content.js"],
       "run_at": "document_idle"
     }
   ],
