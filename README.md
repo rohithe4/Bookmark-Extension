@@ -17,7 +17,7 @@ A Chrome extension that saves bookmarks from X (Twitter), Instagram, and other w
 ### Step 1: Download the extension
 
 ```bash
-git clone https://github.com/yourusername/notion-bookmark-saver.git
+git clone https://github.com/rohithe4/Bookmark-Extension.git
 ```
 
 Or download the ZIP file and extract it.
