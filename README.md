@@ -98,8 +98,9 @@ Click the gear icon in the extension popup to:
 ## Screenshots
 
 Extension
-https://github.com/user-attachments/assets/8b74c712-e634-4e23-b655-35a40cb65dd6
+<img width="451" height="598" alt="image" src="https://github.com/user-attachments/assets/b4191bb9-8d4c-46ba-b718-c3442f3ed941" />
 
+Onboarding
 <img width="1836" height="870" alt="image" src="https://github.com/user-attachments/assets/3fc1f335-3d30-4d09-813c-c78d865e1ba7" />
 
 
